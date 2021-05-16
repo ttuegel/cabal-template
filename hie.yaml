@@ -1,0 +1,4 @@
+cradle:
+ cabal:
+  - { path: "./src", component: "lib:cabal-template" }
+  - { path: "./test", component: "cabal-template:cabal-template-test" }

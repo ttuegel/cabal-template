@@ -1,0 +1,134 @@
+cabal-version: 2.2
+name: cabal-template
+version: 0.1.0.0
+description: Please see the [README](README.md) file.
+category: Language
+homepage: https://github.com/ttuegel/cabal-template
+bug-reports: https://github.com/ttuegel/cabal-template/issues
+author: Thomas Tuegel
+maintainer: ttuegel@mailbox.org
+copyright: 2021 Thomas Tuegel
+license: BSD-3-Clause
+license-file: LICENSE
+build-type: Simple
+extra-source-files:
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/ttuegel/cabal-template
+
+flag release
+  description: Build a faster runtime, at the expense of a slower build.
+  manual: True
+  default: False
+
+flag threaded
+  description: Use the threaded runtime. Recommended to disable for profiling.
+  manual: True
+  default: True
+
+common haskell
+  -- Common Haskell dialect
+  default-extensions:
+    BangPatterns
+    ConstraintKinds
+    DataKinds
+    DefaultSignatures
+    DeriveAnyClass
+    DeriveDataTypeable
+    DeriveFoldable
+    DeriveFunctor
+    DeriveGeneric
+    DeriveTraversable
+    DerivingVia
+    DuplicateRecordFields
+    EmptyCase
+    ExistentialQuantification
+    FlexibleContexts
+    FlexibleInstances
+    FunctionalDependencies
+    GADTs
+    GeneralizedNewtypeDeriving
+    InstanceSigs
+    KindSignatures
+    LambdaCase
+    MultiParamTypeClasses
+    NamedFieldPuns
+    NoImplicitPrelude
+    OverloadedStrings
+    PatternSynonyms
+    RankNTypes
+    ScopedTypeVariables
+    StandaloneDeriving
+    Strict
+    TypeApplications
+    TypeFamilies
+    TypeOperators
+    TypeSynonymInstances
+    UndecidableInstances
+    ViewPatterns
+  default-language: Haskell2010
+  build-depends: base >=4.7
+  ghc-options:
+    -fno-ignore-asserts
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-uni-patterns
+    -Wincomplete-record-updates
+    -Wredundant-constraints
+    -Wnoncanonical-monad-instances
+    -Wmissing-deriving-strategies
+  ghc-options:
+  if impl(ghc >= 8.4)
+    ghc-options: -Wmissing-export-lists -Wpartial-fields
+  if impl(ghc >= 8.8)
+    ghc-options: -fwrite-ide-info -hiedir=.hie
+
+common exe
+  -- Common options for all executables
+  if flag(threaded)
+    ghc-options: -threaded -rtsopts "-with-rtsopts=-N -T -A32M -qn4"
+  else
+    ghc-options: -rtsopts "-with-rtsopts=-A32M -T"
+
+common library
+  -- Dependencies of the library, shared in common with the tests
+  build-depends: bytestring >=0.10
+  build-depends: cassava >=0.5
+  build-depends: comonad >=5.0
+  build-depends: containers >=0.5.8
+  build-depends: deepseq >=1.4
+  build-depends: directory >=1.3
+  build-depends: errors >=2.3
+  build-depends: exceptions >=0.10
+  build-depends: filepath >=1.4
+  build-depends: free >=5.1
+  build-depends: generic-lens >=1.1
+  build-depends: mtl >=2.2
+  build-depends: optparse-applicative >=0.14
+  build-depends: prettyprinter >=1.2
+  build-depends: text >=1.2
+  build-depends: these >=1.0
+  build-depends: witherable >=0.4
+  build-depends: zlib >=0.6
+
+library
+  import: haskell
+  import: library
+  hs-source-dirs: src
+  if !flag(release)
+    ghc-options: -fno-specialise
+  exposed-modules:
+    Lib
+
+test-suite cabal-template-test
+  import: haskell
+  import: library
+  import: exe
+  type: exitcode-stdio-1.0
+  build-depends: cabal-template
+  build-depends: hspec >=2.7
+  hs-source-dirs: test
+  main-is: Spec.hs
